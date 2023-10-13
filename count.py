@@ -2,13 +2,15 @@
 
 '''
 
-TA UM POUCO BAGUNÇADO :D (por enquanto)
-MUITOS PRINTS PARA DEBUG
+a bit messy :(
 
-DA PRA DEIXAR MAIS EFICIENTE
+LOTS OF PRINTS FOR DEBUG + workarounds to check results with confidence
 
+Maybe I'll organize it better in the future so anyone can run it easily
+ 
 
 '''
+
 
 import cv2
 import numpy as np
