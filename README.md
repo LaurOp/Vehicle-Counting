@@ -10,7 +10,7 @@ We developed a system that combines YOLO, for vehicle detection, with Visual Rhy
 
 <br>
 
-**The work participated in::** 
+**The work participated in:** 
 - [SIBGRAPI](https://sibgrapi.sbc.org.br/sibgrapi2023/) – Conference on Graphics Patterns and Images, within the Workshop of Undergraduate Works (WUW). It is an annual academic conference held in Brazil that focuses on computer graphics, image processing, computer vision, and related fields.
 - [SIICUSP](https://prpi.usp.br/siicusp/) – International Seminar on Scientific and Technological Initiation of the University of São Paulo. The event provides a platform for undergraduate students to present their scientific and technological research projects.
 
