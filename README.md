@@ -18,19 +18,21 @@ This repository is the official implementation of [Combining YOLO and Visual Rhy
 
 We developed a system that combines YOLO, for vehicle detection, with Visual Rhythm (VR), a way to create time-spatial images. This integration enhances the system's efficiency by approximately 3 times when compared with conventional methods while maintaining similar accuracy.
 
-dasdasdsa
-![Alt Text](./imgs/method-hori.png)
 
-dasdsadas
+<br>
+
+
 <div align="center">
-  <img src="./imgs/method-vert.png" alt="Alt Text" width="500">
+  <img src="./imgs/method-vert.png" width="550">
   <p>
-    sodasd
+    Data flow in the VR–based video counting vehicles
   </p>
 </div>
 
 
+
 <br>
+
 
 
 ## Events
@@ -48,20 +50,39 @@ dasdsadas
 
 
 ## Usage
+
+This codebase is written for ```python3```
+
 ```bash
-# install yarn
-npm install --global yarn
+# Clone this repository
+git clone https://github.com/victor-nasc/YOLO-Visual-Rhythm-Vehicle-Counting.git
 
-# install dependencies
-yarn
+# Install dependencies
+pip install -r requirements.txt
 
-# run the frontend, it should start in http://localhost:5173
-yarn dev
+# Run the program
+python3 count.py [--OPTIONS]
+
+# --[OPTIONS]
+#    --line: Line position                           [default: 600]
+#    --interval: Interval between VR images (frames) [default: 900]
+#    --save-VR: Enable saving VR images              [default: False]
+#    --save-vehicle: Enable saving vehicle images    [default: False]
+#    
+#    The video path is prompted during execution.
 ```
 
-**Requirements**
-```sh
-numpy
-opencv-python
-ultralytics
+
+
+<br>
+
+
+
+## Citation
+
+If you find the code useful in your research, please consider citing our paper:
+
 ```
+...
+```
+
