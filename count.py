@@ -221,8 +221,8 @@ if __name__ == "__main__":
     
     parser.add_argument('--line', type=int, default=600, help='Line position')
     parser.add_argument('--interval', type=int, default=900, help='Interval between VR images (frames)')
-    parser.add_argument('--save-VR', type=bool, default='False', help='Enable saving VR images')
-    parser.add_argument('--save-vehicle', type=bool, default='False', help='Enable saving vehicle images')
+    parser.add_argument('--save-VR', type=bool, default=False, help='Enable saving VR images')
+    parser.add_argument('--save-vehicle', type=bool, default=False, help='Enable saving vehicle images')
     args = parser.parse_args()
 
 
