@@ -4,6 +4,8 @@ This repository is the official implementation of [Combining YOLO and Visual Rhy
 
 **Authors**: Victor N. Ribeiro and Nina S. T. Hirata
 
+[Link to the paper](https://drive.google.com/file/d/1wVH4HC0ClA7rfVMxXEBE4QctVhcGZBMU/view?usp=sharing)
+
 ![Alt Text](./imgs/print_sb.png)
 
 
@@ -40,8 +42,6 @@ We developed a system that combines YOLO, for vehicle detection, with Visual Rhy
 **The work participated in:** 
 - [SIBGRAPI](https://sibgrapi.sbc.org.br/sibgrapi2023/) (**Honorable Mention**) – Conference on Graphics Patterns and Images, within the Workshop of Undergraduate Works (WUW). It is an annual academic conference held in Brazil that focuses on computer graphics, image processing, computer vision, and related fields.
 - [SIICUSP](https://prpi.usp.br/siicusp/) – _Simpósio Internacional de Iniciação Científica e Tecnológica da USP_ (International Symposium on Scientific and Technological Initiation at USP). The event provides a platform for undergraduate students to present their scientific and technological research projects.
-
-[Link to the paper](https://drive.google.com/file/d/1wVH4HC0ClA7rfVMxXEBE4QctVhcGZBMU/view?usp=sharing)
 
 
 
