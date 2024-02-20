@@ -4,7 +4,7 @@ This repository is the official implementation of [Combining YOLO and Visual Rhy
 
 **Authors**: Victor N. Ribeiro and Nina S. T. Hirata
 
-[Link to the paper](https://drive.google.com/file/d/1wVH4HC0ClA7rfVMxXEBE4QctVhcGZBMU/view?usp=sharing)
+[Link to the paper](https://sol.sbc.org.br/index.php/sibgrapi_estendido/article/view/27473)
 
 ![Alt Text](./imgs/print_sb.png)
 
@@ -83,6 +83,19 @@ python3 count.py [--OPTIONS]
 If you find the code useful in your research, please consider citing our paper:
 
 ```
-...
+@inproceedings{sibgrapi_estendido,
+ author = {Victor Ribeiro and Nina Hirata},
+ title = {Combining YOLO and Visual Rhythm for Vehicle Counting},
+ booktitle = {Anais Estendidos do XXXVI Conference on Graphics, Patterns and Images},
+ location = {Rio Grande/RS},
+ year = {2023},
+ keywords = {},
+ issn = {0000-0000},
+ pages = {164--167},
+ publisher = {SBC},
+ address = {Porto Alegre, RS, Brasil},
+ url = {https://sol.sbc.org.br/index.php/sibgrapi_estendido/article/view/27473}
+}
+
 ```
 
