@@ -55,7 +55,7 @@ This codebase is written for ```python3```
 
 ```bash
 # Clone this repository
-git clone https://github.com/victor-nasc/YOLO-Visual-Rhythm-Vehicle-Counting.git
+git clone https://github.com/victor-nasc/Vehicle-Counting.git
 
 # Install dependencies
 pip install -r requirements.txt
