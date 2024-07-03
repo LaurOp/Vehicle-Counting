@@ -1,10 +1,10 @@
 # Combining YOLO and Visual Rhythm for Vehicle Counting
 
-This repository is the official implementation of [Combining YOLO and Visual Rhythm for Vehicle Counting]
+This repository is the official implementation of [Combining YOLO and Visual Rhythm for Vehicle Counting] paper
 
-**Authors**: Victor N. Ribeiro and Nina S. T. Hirata
+**Authors**: Victor Nascimento Ribeiro and Nina S. T. Hirata
 
-[Link to the paper](https://sol.sbc.org.br/index.php/sibgrapi_estendido/article/view/27473)
+Link to the paper: [https://doi.org/10.5753/sibgrapi.est.2023.27473](https://doi.org/10.5753/sibgrapi.est.2023.27473)
 
 ![Alt Text](./imgs/print_sb.png)
 
@@ -13,6 +13,7 @@ This repository is the official implementation of [Combining YOLO and Visual Rhy
 <br>
 
 
+## Description
 
 **This work presents an alternative and more efficient method for counting vehicles in videos using Deep Learning and Computer Vision techniques.**
 
@@ -40,8 +41,8 @@ We developed a system that combines YOLO, for vehicle detection, with Visual Rhy
 ## Events
 
 **The work participated in:** 
-- [SIBGRAPI](https://sibgrapi.sbc.org.br/sibgrapi2023/) (**Honorable Mention**) – Conference on Graphics Patterns and Images, within the Workshop of Undergraduate Works (WUW). It is an annual academic conference held in Brazil that focuses on computer graphics, image processing, computer vision, and related fields.
-- [SIICUSP](https://prpi.usp.br/siicusp/) – _Simpósio Internacional de Iniciação Científica e Tecnológica da USP_ (International Symposium on Scientific and Technological Initiation at USP). The event provides a platform for undergraduate students to present their scientific and technological research projects.
+- **[SIBGRAPI](https://sibgrapi.sbc.org.br/sibgrapi2023/)** – Conference on Graphics Patterns and Images, within the Workshop of Undergraduate Works (WUW). It is an annual academic conference held in Brazil that focuses on computer graphics, image processing, computer vision, and related fields. This work recieved [Honorable Mention](https://sibgrapi.sbc.org.br/sibgrapi2023/awards.html) in the WUW (Workshop of Undergraduate Works) Track
+- **[SIICUSP](https://prpi.usp.br/siicusp/)** – _Simpósio Internacional de Iniciação Científica e Tecnológica da USP_ (International Symposium on Scientific and Technological Initiation at USP). The event provides a platform for undergraduate students to present their scientific and technological research projects.
 
 
 
