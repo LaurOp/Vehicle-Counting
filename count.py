@@ -130,8 +130,8 @@ def main(video_path, line, sec, saveVR, saveVehicle):
     
     
     # load models
-    model_mark = YOLO('./YOLO/marks/weights/best.pt')
-    model_vehicle = YOLO('./YOLO/vehicle/weights/best.pt')
+    model_mark = YOLO('./YOLO/marks.pt')
+    model_vehicle = YOLO('./YOLO/vehicle.pt')
 
 
     # opens the video

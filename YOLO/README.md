@@ -1,4 +1,6 @@
-### For training we fine-tuned a pretrained YOLOv8-small model for mark and vehicle detection
+### YOLOv8 model for mark and vehicle detection
+
+[Trainig Details](https://drive.google.com/drive/folders/1QLfDRS6OSrBGO76CgvGoCCof6xgxZJub?usp=sharing)
 
 **Vehicle detection**
 ```
