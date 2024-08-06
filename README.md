@@ -6,7 +6,7 @@ This repository is the official implementation of [Combining YOLO and Visual Rhy
 
 Link to the paper: [https://doi.org/10.5753/sibgrapi.est.2023.27473](https://doi.org/10.5753/sibgrapi.est.2023.27473)
 
-![Alt Text](./imgs/print_sb.png)
+![Alt Text](https://i.imgur.com/1S6EajH.png)
 
 
 
@@ -26,7 +26,7 @@ We developed a system that combines YOLO, for vehicle detection, with Visual Rhy
 
 
 <div align="center">
-  <img src="./imgs/method-vert.png" width="550">
+  <img src="https://i.imgur.com/XLU6bmq.png" width="550">
   <p>
     Data flow in the VR–based video counting vehicles
   </p>
@@ -62,9 +62,9 @@ git clone https://github.com/victor-nasc/Vehicle-Counting.git
 pip install -r requirements.txt
 
 # Run the program
-python3 count.py [--OPTIONS]
+python3 count.py --OPTIONS
 
-# --[OPTIONS]
+# --OPTIONS
 #    --line: Line position                           [default: 600]
 #    --interval: Interval between VR images (frames) [default: 900]
 #    --save-VR: Enable saving VR images              [default: False]
