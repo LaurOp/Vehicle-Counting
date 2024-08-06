@@ -1,6 +1,6 @@
-# Combining YOLO and Visual Rhythm for Vehicle Counting
+# Vehicle Counting in videos
 
-This repository is the official implementation of [Combining YOLO and Visual Rhythm for Vehicle Counting] paper
+This repository is the official implementation of **Combining YOLO and Visual Rhythm for Vehicle Counting** paper
 
 **Authors**: Victor Nascimento Ribeiro and Nina S. T. Hirata
 
