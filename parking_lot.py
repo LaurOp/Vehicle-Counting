@@ -1,3 +1,19 @@
+'''
+@inproceedings{sibgrapi_estendido,
+ author = {Victor Ribeiro and Nina Hirata},
+ title = {Combining YOLO and Visual Rhythm for Vehicle Counting},
+ booktitle = {Anais Estendidos do XXXVI Conference on Graphics, Patterns and Images},
+ location = {Rio Grande/RS},
+ year = {2023},
+ keywords = {},
+ issn = {0000-0000},
+ pages = {164--167},
+ publisher = {SBC},
+ address = {Porto Alegre, RS, Brasil},
+ url = {https://sol.sbc.org.br/index.php/sibgrapi_estendido/article/view/27473}
+}
+'''
+
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import cv2
@@ -44,6 +60,7 @@ SAVE_VEHICLE = False
 MODEL_MARK = YOLO('../Vehicle-Counting/YOLO/marks.pt')
 MODEL_VEHICLE = YOLO('../Vehicle-Counting/YOLO/vehicle.pt')
 
+
 def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle, side):
     labels = ['Bus', 'Car', 'Motorbike', 'Pickup', 'Truck', 'Van', '???']
     count = np.array([0, 0, 0, 0, 0, 0, 0])
@@ -51,13 +68,11 @@ def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle,
     infos = [['label', 'frame', 'conf', 'x0', 'y0', 'x1', 'y1']]
     delta = 120
 
-
     # detect marks
     marks = MODEL_MARK(VR, iou=0.05, conf=0.25, verbose=False)
     marks = marks[0].numpy()
     boxes = marks.boxes.xyxy
     print(f'Detected {len(boxes)} marks')
-
 
     # for each mark
     for box in boxes:
@@ -72,29 +87,25 @@ def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle,
             if any(x1_ant <= mid <= x2_ant for x1_ant, x2_ant in double):
                 continue
 
-
         # gets the corresponding frame
         frame = ini + (y0 + y1) // 2
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
 
         ret, img = cap.read()
         if ret == False:
-            print('Frame not found  :(') # should never happen
+            print('Frame not found  :(')  # should never happen
             continue
 
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
         # detect vehicles
         vehicles = MODEL_VEHICLE(img, iou=0.5, conf=0.3, verbose=False)
         vehicles = vehicles[0].numpy()
 
-
         # extend the mark's x-coordinates
         a = max(x0 - delta, 0)
         b = min(x1 + delta, width)
-
 
         # find the vehicle associated with the mark
         dist_min = height
@@ -112,8 +123,7 @@ def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle,
                     classe = int(cls)
                     conf = cnf
                     if saveVehicle:
-                        crop = img[y0:y1 , x0:x1]
-
+                        crop = img[y0:y1, x0:x1]
 
         # update infos
         infos.append([labels[classe], frame, conf, x0, y0, x1, y1])
@@ -125,7 +135,6 @@ def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle,
             # Increment UI slots
             update_parking_status(side)
 
-
         if classe == -1:
             print(f"Couldn't find the vehicle in frame {frame}!!!")
             print('VERIFY IT MANUALLY')
@@ -135,18 +144,18 @@ def counting(VR, line, cap, ini, double, MODEL_MARK, MODEL_VEHICLE, saveVehicle,
             print(f'Saving as {name}')
             cv2.imwrite(name, crop)
 
-
     print('Count in this VR: ')
     # print_count(count)
     # print()
 
     return duo, count, infos
 
+
 #endregion
 
 #region Methods
 
-def update_parking_status(side = None):
+def update_parking_status(side=None):
     global AVAILABLE_SLOTS, OCCUPIED_SLOTS, AVAILABLE_LABEL, OCCUPIED_LABEL, STATUS_CANVAS
 
     if side == "left" and AVAILABLE_SLOTS > 0:
@@ -164,6 +173,7 @@ def update_parking_status(side = None):
     else:
         STATUS_CANVAS.config(bg="red")
 
+
 def select_video(side, canvas):
     global VIDEO_PATHS, START_VIDEO, CAP, PLAYING, PAUSED, VIDEO_THREADS
 
@@ -173,6 +183,7 @@ def select_video(side, canvas):
         VIDEO_PATHS[side] = file_path
 
         manage_video(side, canvas)
+
 
 def next_video(side, canvas):
     global MULTIPLE_VIDEOS_PATHS, VIDEOS_INDEX, VIDEO_PATHS
@@ -184,6 +195,7 @@ def next_video(side, canvas):
     manage_video(side, canvas)
 
     VIDEOS_INDEX[side] += 1
+
 
 def manage_video(side, canvas):
     global VIDEO_PATHS, START_VIDEO, CAP, PLAYING, PAUSED, VIDEO_THREADS
@@ -208,6 +220,7 @@ def manage_video(side, canvas):
     except FileNotFoundError as s:
         print(f"File not found exception: {s}")
 
+
 def show_first_frame(side, canvas):
     global VIDEO_PATHS
     if VIDEO_PATHS[side]:
@@ -217,6 +230,7 @@ def show_first_frame(side, canvas):
             resize_frame(canvas, frame)
 
         cap.release()
+
 
 def play_pause_video(side, canvas):
     global PAUSED, PLAYING, VIDEO_THREADS, LEFT_SELECT_BUTTON, RIGHT_SELECT_BUTTON
@@ -241,6 +255,7 @@ def play_pause_video(side, canvas):
     elif side == "right" and RIGHT_NEXT_BUTTON:
         RIGHT_NEXT_BUTTON.config(state="disabled" if not PAUSED[side] else "normal")
 
+
 class VideoThread(threading.Thread):
     def __init__(self, stop_event, side, canvas):
         super().__init__()
@@ -250,6 +265,7 @@ class VideoThread(threading.Thread):
 
     def run(self):
         play_video(self.side, self.canvas, self.stop_event)
+
 
 def play_video(side, canvas, stop_event):
     global PAUSED, PLAYING, VIDEO_PATHS, LINE_POSITION, INTERVAL_BETWEEN_VR_IMAGES, INFINITE_VIDEO_LOOP, CAP
@@ -261,11 +277,11 @@ def play_video(side, canvas, stop_event):
         print(VIDEO_THREADS[side].ident)
 
         #region Paper Code
-        ini = 0     # current VR initial frame
-        double = [] # marks on the border of the previous VR
+        ini = 0  # current VR initial frame
+        double = []  # marks on the border of the previous VR
         infos = []  # details of each vehicle
-        VR = []     # VR image
-        count = np.array([0, 0, 0, 0, 0, 0, 0]) # count of each class
+        VR = []  # VR image
+        count = np.array([0, 0, 0, 0, 0, 0, 0])  # count of each class
         #endregion
 
         while CAP[side].isOpened() and PLAYING[side]:
@@ -318,14 +334,14 @@ def play_video(side, canvas, stop_event):
 
         if not stop_event.is_set() and len(VR) > 0:
             _, cnt, inf = counting(np.array(VR),
-                                LINE_POSITION[side],
-                                CAP[side],
-                                ini,
-                                double,
-                                MODEL_MARK,
-                                MODEL_VEHICLE,
-                                SAVE_VEHICLE,
-                                side)
+                                   LINE_POSITION[side],
+                                   CAP[side],
+                                   ini,
+                                   double,
+                                   MODEL_MARK,
+                                   MODEL_VEHICLE,
+                                   SAVE_VEHICLE,
+                                   side)
 
         #endregion
 
@@ -341,6 +357,7 @@ def play_video(side, canvas, stop_event):
         PAUSED[side] = False
         print(f"Thread {VIDEO_THREADS[side].ident} has finished.")
 
+
 def resize_frame(canvas, frame):
     height, width, _ = frame.shape
 
@@ -350,7 +367,7 @@ def resize_frame(canvas, frame):
     aspect_ratio = width / height
 
     if width > height:
-        new_width = canvas_width - VIDEO_FRAME_PADDING # Keep a padding
+        new_width = canvas_width - VIDEO_FRAME_PADDING  # Keep a padding
         new_height = int(new_width / aspect_ratio)
     else:
         new_height = canvas_height - VIDEO_FRAME_PADDING
@@ -370,13 +387,16 @@ def resize_frame(canvas, frame):
     canvas.create_image(anchorX, anchorY, anchor=tk.NW, image=img)
     canvas.image = img
 
+
 def set_total_slots(root):
     global TOTAL_SLOTS, AVAILABLE_SLOTS, OCCUPIED_SLOTS
-    new_total_slots = simpledialog.askinteger("Set Parking Lot Slots", "Enter total number of slots:", initialvalue=TOTAL_SLOTS, parent=root, minvalue=1)
+    new_total_slots = simpledialog.askinteger("Set Parking Lot Slots", "Enter total number of slots:",
+                                              initialvalue=TOTAL_SLOTS, parent=root, minvalue=1)
     if new_total_slots is not None:
         TOTAL_SLOTS = new_total_slots
         AVAILABLE_SLOTS = TOTAL_SLOTS - OCCUPIED_SLOTS
         update_parking_status()
+
 
 def set_line_position(root, side):
     global LINE_POSITION
@@ -387,6 +407,7 @@ def set_line_position(root, side):
     if new_line_position is not None:
         LINE_POSITION[side] = new_line_position
 
+
 def set_vr_interval(root, side):
     global INTERVAL_BETWEEN_VR_IMAGES
     new_VR_interval = simpledialog.askinteger("Set VR Interval", "Enter interval between VR images",
@@ -395,6 +416,7 @@ def set_vr_interval(root, side):
                                               minvalue=0)
     if new_VR_interval is not None:
         INTERVAL_BETWEEN_VR_IMAGES[side] = new_VR_interval
+
 
 def set_start_video(root, side):
     global START_VIDEO
@@ -410,6 +432,7 @@ def set_start_video(root, side):
         else:
             print("Invalid input. Please enter 'True' or 'False'.")
 
+
 def set_infinite_loop(root, side):
     user_input = simpledialog.askstring(
         "Set Infinite Loop",
@@ -424,12 +447,14 @@ def set_infinite_loop(root, side):
         else:
             print("Invalid input. Please enter 'True' or 'False'.")
 
+
 def append_video(side):
     global MULTIPLE_VIDEOS_PATHS
 
     file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.avi;*.mkv")])
     if file_path:
         MULTIPLE_VIDEOS_PATHS[side].append(file_path)
+
 
 def set_default_video(side):
     global VIDEO_PATHS
@@ -438,6 +463,7 @@ def set_default_video(side):
     if file_path:
         VIDEO_PATHS[side] = file_path
         show_first_frame(side, CANVAS[side])
+
 
 def load_configuration():
     # GLOBAL
@@ -482,12 +508,13 @@ def load_configuration():
         INFINITE_VIDEO_LOOP["right"] = retrieveKeyValue(right, "infiniteVideoLoop")
         MULTIPLE_VIDEOS_PATHS["right"] = retrieveKeyValue(right, "nextVideos")
 
+
 def save_configuration():
     global TOTAL_SLOTS, DEFAULT_WIDTH, DEFAULT_HEIGHT, VIDEO_FRAME_PADDING
     global VIDEO_PATHS, LINE_POSITION, INTERVAL_BETWEEN_VR_IMAGES, START_VIDEO, INFINITE_VIDEO_LOOP, MULTIPLE_VIDEOS_PATHS
 
     data = {
-        "general":{
+        "general": {
             "totalSlots": TOTAL_SLOTS,
             "width": DEFAULT_WIDTH,
             "height": DEFAULT_HEIGHT,
@@ -514,12 +541,14 @@ def save_configuration():
     with open("config.json", "w") as write:
         json.dump(data, write)
 
+
 def play_default_videos(side, canvas):
     global START_VIDEO
 
     show_first_frame(side, canvas)
     if (START_VIDEO[side]):
         play_pause_video(side, canvas)
+
 
 #endregion
 
@@ -539,7 +568,8 @@ def application():
     # Configuration
     configuration_menu = tk.Menu(menu_bar, tearoff=0)
     configuration_menu.add_command(label="Load Configuration (from config.json)", command=lambda: load_configuration())
-    configuration_menu.add_command(label="Save Current Configuration (to config.json)", command=lambda: save_configuration())
+    configuration_menu.add_command(label="Save Current Configuration (to config.json)",
+                                   command=lambda: save_configuration())
 
     # General Variables
     variables_menu = tk.Menu(menu_bar, tearoff=0)
@@ -549,7 +579,8 @@ def application():
     left_variables_menu = tk.Menu(menu_bar, tearoff=0)
     left_variables_menu.add_command(label="Set Default Video (left)", command=lambda: set_default_video("left"))
     left_variables_menu.add_command(label="Set Line Position (left)", command=lambda: set_line_position(root, "left"))
-    left_variables_menu.add_command(label="Set Interval Between VR Images (left)", command=lambda: set_vr_interval(root, "left"))
+    left_variables_menu.add_command(label="Set Interval Between VR Images (left)",
+                                    command=lambda: set_vr_interval(root, "left"))
     left_variables_menu.add_command(label="Set Start Video (left)", command=lambda: set_start_video(root, "left"))
     left_variables_menu.add_command(label="Set Infinite Loop (left)", command=lambda: set_infinite_loop(root, "left"))
     left_variables_menu.add_command(label="Add New Video (left)", command=lambda: append_video("left"))
@@ -557,10 +588,13 @@ def application():
     # right Variables
     right_variables_menu = tk.Menu(menu_bar, tearoff=0)
     right_variables_menu.add_command(label="Set Default Video (right)", command=lambda: set_default_video("right"))
-    right_variables_menu.add_command(label="Set Line Position (right)", command=lambda: set_line_position(root, "right"))
-    right_variables_menu.add_command(label="Set Interval Between VR Images (right)", command=lambda: set_vr_interval(root, "right"))
+    right_variables_menu.add_command(label="Set Line Position (right)",
+                                     command=lambda: set_line_position(root, "right"))
+    right_variables_menu.add_command(label="Set Interval Between VR Images (right)",
+                                     command=lambda: set_vr_interval(root, "right"))
     right_variables_menu.add_command(label="Set Start Video (right)", command=lambda: set_start_video(root, "right"))
-    right_variables_menu.add_command(label="Set Infinite Loop (right)", command=lambda: set_infinite_loop(root, "right"))
+    right_variables_menu.add_command(label="Set Infinite Loop (right)",
+                                     command=lambda: set_infinite_loop(root, "right"))
     right_variables_menu.add_command(label="Add New Video (right)", command=lambda: append_video("right"))
 
     # Reset
@@ -623,39 +657,45 @@ def application():
     tk.Label(right_video_frame, text="Exit Gate", font=("Arial", 14), bg="light gray").pack(pady=5)
 
     # Left video section
-    CANVAS["left"] = tk.Canvas(left_video_frame, bg="dark gray", width=DEFAULT_WIDTH//2, height=DEFAULT_HEIGHT//2)
+    CANVAS["left"] = tk.Canvas(left_video_frame, bg="dark gray", width=DEFAULT_WIDTH // 2, height=DEFAULT_HEIGHT // 2)
     CANVAS["left"].pack(fill=tk.BOTH, expand=True)
 
     left_buttons_frame = tk.Frame(left_video_frame, bg="light gray")
     left_buttons_frame.pack(fill=tk.X, pady=5)
 
-    LEFT_SELECT_BUTTON = tk.Button(left_buttons_frame, text="Select Camera", command=lambda: select_video("left", CANVAS["left"]))
+    LEFT_SELECT_BUTTON = tk.Button(left_buttons_frame, text="Select Camera",
+                                   command=lambda: select_video("left", CANVAS["left"]))
     LEFT_SELECT_BUTTON.pack(side=tk.LEFT, padx=10)
     LEFT_SELECT_BUTTON.config(state="disabled" if START_VIDEO["left"] else "normal")
 
-    LEFT_NEXT_BUTTON = tk.Button(left_buttons_frame, text="Switch Camera", command=lambda: next_video("left", CANVAS["left"]))
+    LEFT_NEXT_BUTTON = tk.Button(left_buttons_frame, text="Switch Camera",
+                                 command=lambda: next_video("left", CANVAS["left"]))
     LEFT_NEXT_BUTTON.pack(side=tk.RIGHT, padx=10)
     LEFT_NEXT_BUTTON.config(state="disabled" if START_VIDEO["left"] else "normal")
 
-    left_play_button = tk.Button(left_buttons_frame, text="Play/Pause", command=lambda: play_pause_video("left", CANVAS["left"]))
+    left_play_button = tk.Button(left_buttons_frame, text="Play/Pause",
+                                 command=lambda: play_pause_video("left", CANVAS["left"]))
     left_play_button.pack(side=tk.RIGHT, padx=10)
 
     # Right video section
-    CANVAS["right"] = tk.Canvas(right_video_frame, bg="dark gray", width=DEFAULT_WIDTH//2, height=DEFAULT_HEIGHT//2)
+    CANVAS["right"] = tk.Canvas(right_video_frame, bg="dark gray", width=DEFAULT_WIDTH // 2, height=DEFAULT_HEIGHT // 2)
     CANVAS["right"].pack(fill=tk.BOTH, expand=True)
 
     right_buttons_frame = tk.Frame(right_video_frame, bg="light gray")
     right_buttons_frame.pack(fill=tk.X, pady=5)
 
-    RIGHT_SELECT_BUTTON = tk.Button(right_buttons_frame, text="Select Camera", command=lambda: select_video("right", CANVAS["right"]))
+    RIGHT_SELECT_BUTTON = tk.Button(right_buttons_frame, text="Select Camera",
+                                    command=lambda: select_video("right", CANVAS["right"]))
     RIGHT_SELECT_BUTTON.pack(side=tk.LEFT, padx=10)
     RIGHT_SELECT_BUTTON.config(state="disabled" if START_VIDEO["right"] else "normal")
 
-    RIGHT_NEXT_BUTTON = tk.Button(right_buttons_frame, text="Switch Camera", command=lambda: next_video("right", CANVAS["right"]))
+    RIGHT_NEXT_BUTTON = tk.Button(right_buttons_frame, text="Switch Camera",
+                                  command=lambda: next_video("right", CANVAS["right"]))
     RIGHT_NEXT_BUTTON.pack(side=tk.RIGHT, padx=10)
     RIGHT_NEXT_BUTTON.config(state="disabled" if START_VIDEO["right"] else "normal")
 
-    right_play_button = tk.Button(right_buttons_frame, text="Play/Pause", command=lambda: play_pause_video("right", CANVAS["right"]))
+    right_play_button = tk.Button(right_buttons_frame, text="Play/Pause",
+                                  command=lambda: play_pause_video("right", CANVAS["right"]))
     right_play_button.pack(side=tk.RIGHT, padx=10)
 
     root.after(100, lambda: play_default_videos("left", CANVAS["left"]))
@@ -664,6 +704,7 @@ def application():
 
     # Start the main loop
     root.mainloop()
+
 
 if __name__ == "__main__":
     load_configuration()
