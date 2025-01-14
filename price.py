@@ -210,10 +210,10 @@ if __name__ == "__main__":
     # parse arguments
     parser = argparse.ArgumentParser(description='Count the number of vehicles in a video')
 
-    parser.add_argument('--line', type=int, default=600, help='Line position')
-    parser.add_argument('--interval', type=int, default=60, help='Interval between VR images (frames)')
-    parser.add_argument('--save-VR', type=bool, default=True, help='Enable saving VR images')
-    parser.add_argument('--save-vehicle', type=bool, default=True, help='Enable saving vehicle images')
+    parser.add_argument('--line', type=int, default=465, help='Line position')
+    parser.add_argument('--interval', type=int, default=90, help='Interval between VR images (frames)')
+    parser.add_argument('--save-VR', type=bool, default=False, help='Enable saving VR images')
+    parser.add_argument('--save-vehicle', type=bool, default=False, help='Enable saving vehicle images')
     args = parser.parse_args()
 
     video_path = input('Enter the video path: ')
