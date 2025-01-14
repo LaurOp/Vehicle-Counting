@@ -1,4 +1,4 @@
-'''
+"""
 @inproceedings{sibgrapi_estendido,
  author = {Victor Ribeiro and Nina Hirata},
  title = {Combining YOLO and Visual Rhythm for Vehicle Counting},
@@ -12,7 +12,7 @@
  address = {Porto Alegre, RS, Brasil},
  url = {https://sol.sbc.org.br/index.php/sibgrapi_estendido/article/view/27473}
 }
-'''
+"""
 
 import tkinter as tk
 from tkinter import filedialog, simpledialog
