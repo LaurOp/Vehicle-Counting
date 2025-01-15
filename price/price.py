@@ -94,6 +94,7 @@ def print_ticket_info():
     for vehicle, price in prices.items():
         print(f"  {vehicle}: ${price:.2f}")
 
+
 def calculate_ticket_prices():
     """
     Calculate ticket prices based on parking lot usage.
@@ -142,6 +143,7 @@ def decay_parking_lot():
         print(
             f"Parking lot decay occurred. Remaining parking lot capacity: {remaining_capacity}/{PARKING_LOT_CAPACITY} square meters.")
 
+
 def update_parking_lot(count):
     """
     Update the parking lot state with the counts from the current VR.
@@ -172,8 +174,6 @@ def update_parking_lot(count):
     remaining_capacity = PARKING_LOT_CAPACITY - total_occupied
 
     print(f"Remaining parking lot capacity: {remaining_capacity}/{PARKING_LOT_CAPACITY} square meters")
-
-
 
 
 def counting(VR, line, cap, ini, double, model_mark, model_vehicle, saveVehicle):
@@ -230,14 +230,16 @@ def counting(VR, line, cap, ini, double, model_mark, model_vehicle, saveVehicle)
 
     return duo, count
 
+
 def print_session_profit():
     """
     Prints the total profit made during the current session.
     """
     print(f"\nTotal profit for this session: ${total_session_profit:.2f}")
 
+
 def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps):
-    global  daily_profit_estimate
+    global daily_profit_estimate
     """
     Dynamically estimates daily profit based on the video processing rate.
 
@@ -251,7 +253,7 @@ def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps)
     """
     # Calculate video time processed in 30 real-time seconds
     video_time_per_vr = vr_interval / video_fps  # Video time represented by one VR
-    vr_count_in_30s = 30 / video_time_per_vr     # VRs processed in 30 real-time seconds
+    vr_count_in_30s = 30 / video_time_per_vr  # VRs processed in 30 real-time seconds
     video_time_in_30s = vr_count_in_30s * video_time_per_vr
 
     # Calculate profit per second of video time
@@ -270,7 +272,8 @@ def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps)
         daily_profit_estimate = 0
     else:
         profit_per_space = total_session_profit / total_occupied
-        daily_profit_estimate = total_session_profit + (profit_per_space * (PARKING_LOT_CAPACITY - total_occupied) * 1.25 * future_price_factor)
+        daily_profit_estimate = total_session_profit + (
+                    profit_per_space * (PARKING_LOT_CAPACITY - total_occupied) * 1.25 * future_price_factor)
 
     print(f"Profit per second of video: ${profit_per_second_video:.2f}")
     print(f"Estimated daily profit: ${daily_profit_estimate:.2f}")
@@ -282,8 +285,8 @@ def main(video_path, line, sec, saveVR, saveVehicle):
     double = []
     VR = []
 
-    model_mark = YOLO('./YOLO/marks.pt')
-    model_vehicle = YOLO('./YOLO/vehicle.pt')
+    model_mark = YOLO('../YOLO/marks.pt')
+    model_vehicle = YOLO('../YOLO/vehicle.pt')
 
     cap = cv2.VideoCapture(video_path)
     assert cap.isOpened(), 'Cannot open the video'
