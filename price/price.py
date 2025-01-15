@@ -30,22 +30,24 @@ Usage:
     and saved detaily in 'infos.txt' and.
 '''
 
+import argparse
+import time
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
-import argparse
-import os
-import time
 
-# Constants for parking lot management
 PARKING_LOT_CAPACITY = 1000  # square meters
 CURRENT_SPACE = 1000  # square meters
+
 VEHICLE_SIZES = {
     'Car': 3,
     'Truck': 30,
     'Van': 6,
     'Bus': 18
 }
+
+# price ranges
 TICKET_PRICES = {
     'Car': (1, 5),
     'Truck': (5, 25),
@@ -53,7 +55,7 @@ TICKET_PRICES = {
     'Bus': (3.5, 17.5)
 }
 
-# Initialize parking lot state
+# current
 parking_lot_state = {
     'Car': 0,
     'Truck': 0,
@@ -61,7 +63,7 @@ parking_lot_state = {
     'Bus': 0
 }
 
-# Track the total count of vehicles
+# after some cars leave
 vehicle_totals = {
     'Car': 0,
     'Truck': 0,
@@ -77,7 +79,7 @@ LIVE_PRICES = {
 }
 
 total_session_profit = 0
-total_profit_last_30s = 0  # Tracks profit over the last 30 seconds
+total_profit_last_30s = 0
 daily_profit_estimate = 0
 last_decay_time = time.time()
 latest_vehicle = ""
@@ -93,9 +95,6 @@ def print_count(count):
 
 
 def calculate_ticket_prices():
-    """
-    Calculate ticket prices based on parking lot usage.
-    """
     total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
     usage_ratio = total_occupied / PARKING_LOT_CAPACITY
 
@@ -109,13 +108,7 @@ def calculate_ticket_prices():
     return prices
 
 
-import random
-
-
 def decay_parking_lot():
-    """
-    Continuously decay the occupied parking space, randomly freeing up one vehicle type.
-    """
     global last_decay_time
     current_time = time.time()
     elapsed_time = current_time - last_decay_time
@@ -127,17 +120,12 @@ def decay_parking_lot():
         if (CURRENT_SPACE + sqm_to_free) <= PARKING_LOT_CAPACITY:
             CURRENT_SPACE = CURRENT_SPACE + sqm_to_free
 
-        # Update last decay time
         last_decay_time = current_time
 
-        print(
-            f"Parking lot decay occurred. Remaining parking lot capacity: {CURRENT_SPACE}/{PARKING_LOT_CAPACITY} square meters.")
+        print(f"Parking lot decay occurred. Remaining capacity: {CURRENT_SPACE}/{PARKING_LOT_CAPACITY}m².")
 
 
 def update_parking_lot(count):
-    """
-    Update the parking lot state with the counts from the current VR.
-    """
     global total_profit_last_30s, total_session_profit, CURRENT_SPACE
     prices = calculate_ticket_prices()
 
@@ -146,7 +134,6 @@ def update_parking_lot(count):
         print(f"{vehicle}: {price:.2f}")
     print()
 
-    # Update parking lot state and calculate total occupied space
     newVehicles = []
     for vehicle, cnt in count.items():
         if vehicle in parking_lot_state:
@@ -156,7 +143,7 @@ def update_parking_lot(count):
                 ticket_price = prices[vehicle]
                 profit = cnt * ticket_price
                 total_profit_last_30s += profit
-                total_session_profit += profit  # Update the session's total profit
+                total_session_profit += profit
                 print(f"Found a {vehicle.upper()}. +{ticket_price:.2f} per ticket")
                 newVehicles.append((vehicle, ticket_price))
                 global latest_vehicle, latest_ticket_paid
@@ -164,7 +151,6 @@ def update_parking_lot(count):
                 latest_ticket_paid = ticket_price
                 CURRENT_SPACE = CURRENT_SPACE - VEHICLE_SIZES[vehicle] * cnt
 
-    # Calculate total occupied area
     total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
 
     print(f"Remaining parking lot capacity: {CURRENT_SPACE}/{PARKING_LOT_CAPACITY} square meters")
@@ -227,40 +213,24 @@ def counting(VR, line, cap, ini, double, model_mark, model_vehicle, saveVehicle)
 
 
 def print_session_profit():
-    """
-    Prints the total profit made during the current session.
-    """
-    print(f"\nTotal profit for this session: ${total_session_profit:.2f}")
+    print(f"\nTotal profit this session: ${total_session_profit:.2f}")
 
 
 def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps):
     global daily_profit_estimate
-    """
-    Dynamically estimates daily profit based on the video processing rate.
 
-    Args:
-        total_profit_last_30s (float): Profit made in the last 30 real-time seconds.
-        vr_interval (int): Number of frames analyzed per VR.
-        video_fps (int): Frames per second of the video.
-
-    Returns:
-        float: Estimated daily profit.
-    """
-    # Calculate video time processed in 30 real-time seconds
-    video_time_per_vr = vr_interval / video_fps  # Video time represented by one VR
-    vr_count_in_30s = 30 / video_time_per_vr  # VRs processed in 30 real-time seconds
+    video_time_per_vr = vr_interval / video_fps
+    vr_count_in_30s = 30 / video_time_per_vr
     video_time_in_30s = vr_count_in_30s * video_time_per_vr
 
-    # Calculate profit per second of video time
     profit_per_second_video = total_profit_last_30s / video_time_in_30s
 
-    # Calculate how occupied the parking is
     total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
 
-    # if we got profit_per_second using total_occupied space, we can calculate the daily profit estimate based on the total parking lot capacity
+    # if we got profit_per_second using total_occupied space,
+    # we can calculate the daily profit estimate based on the total parking lot capacity
     # also multiply by de median price of the tickets
-    median_price = sum(TICKET_PRICES[vehicle][0] for vehicle in TICKET_PRICES) / len(TICKET_PRICES)
-    # add a buffer to the estimate
+    # and add a buffer to the estimate
     future_price_factor = 1 + (PARKING_LOT_CAPACITY - total_occupied) / PARKING_LOT_CAPACITY
 
     if total_occupied == 0:
@@ -270,7 +240,7 @@ def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps)
         daily_profit_estimate = total_session_profit + (
                 profit_per_space * (PARKING_LOT_CAPACITY - total_occupied) * 1.25 * future_price_factor)
 
-    print(f"Profit per second of video: ${profit_per_second_video:.2f}")
+    print(f"Profit per second: ${profit_per_second_video:.2f}")
     print(f"Estimated daily profit: ${daily_profit_estimate:.2f}")
     return daily_profit_estimate
 
@@ -286,18 +256,15 @@ def main(video_path, line, sec, saveVR, saveVehicle, loop=False):
     cap = cv2.VideoCapture(video_path)
     assert cap.isOpened(), 'Cannot open the video'
 
-    # Calculate delay based on video FPS
     fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_delay = 1 / fps  # Delay in seconds
+    frame_delay = 1 / fps  # in seconds
 
     while True:
-        start_time = time.time()
-
         if loop and ini >= cap.get(cv2.CAP_PROP_FRAME_COUNT):
             ini = 0
             double = []
             VR = []
-            cap.release()  # Release and reinitialize to avoid corruption
+            cap.release()  # reinitialize
             cap = cv2.VideoCapture(video_path)
             assert cap.isOpened(), "Cannot reopen the video file."
 
@@ -308,33 +275,32 @@ def main(video_path, line, sec, saveVR, saveVehicle, loop=False):
         ret, frame = cap.read()
         if not ret:
             if loop:
-                # Reset the video
+                # reset video
                 print("End of video reached. Restarting...")
                 ini = 0
                 double = []
                 VR = []
-                cap.release()  # Release the current video capture
-                cap = cv2.VideoCapture(video_path)  # Reopen the video
+                cap.release()
+                cap = cv2.VideoCapture(video_path)
                 assert cap.isOpened(), "Cannot reopen the video file."
-                cap.set(cv2.CAP_PROP_POS_FRAMES, ini)  # Reset to the start
+                cap.set(cv2.CAP_PROP_POS_FRAMES, ini) # reset to start
                 continue
             else:
-                # If looping is not enabled, break out of the loop
                 break
 
         VR.append(frame[line])
 
         if len(VR) == sec:
             double, count = counting(np.array(VR), line, cap, ini, double, model_mark, model_vehicle, saveVehicle)
-            toReturn = update_parking_lot(count)
-            decay_parking_lot()  # Apply decay
+            update_parking_lot(count)
+            decay_parking_lot()
             estimate_dynamic_daily_profit(total_profit_last_30s, 90, cap.get(cv2.CAP_PROP_FPS))
 
             VR = []
             ini += sec
             cap.set(cv2.CAP_PROP_POS_FRAMES, ini)
 
-        time.sleep(frame_delay)  # Sleep for the remaining time
+        time.sleep(frame_delay)
 
     cap.release()
     cv2.destroyAllWindows()
