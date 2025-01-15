@@ -39,6 +39,7 @@ import time
 
 # Constants for parking lot management
 PARKING_LOT_CAPACITY = 1000  # square meters
+CURRENT_SPACE = 1000  # square meters
 VEHICLE_SIZES = {
     'Car': 3,
     'Truck': 30,
@@ -68,10 +69,19 @@ vehicle_totals = {
     'Bus': 0
 }
 
+LIVE_PRICES = {
+    'Car': 1.0,
+    'Truck': 5.0,
+    'Van': 2.0,
+    'Bus': 3.0
+}
+
 total_session_profit = 0
 total_profit_last_30s = 0  # Tracks profit over the last 30 seconds
 daily_profit_estimate = 0
 last_decay_time = time.time()
+latest_vehicle = ""
+latest_ticket_paid = 0
 
 
 def print_count(count):
@@ -80,19 +90,6 @@ def print_count(count):
 
     for label, cnt in zip(labels, count):
         print(f'{label.ljust(max_length)} : {cnt}')
-
-
-def print_ticket_info():
-    """
-    Prints current ticket prices and parking lot usage.
-    """
-    prices = calculate_ticket_prices()
-    total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
-    print("Current Parking Lot State:")
-    print(f"Occupied Area: {total_occupied}/{PARKING_LOT_CAPACITY} sq. meters")
-    print("Ticket Prices:")
-    for vehicle, price in prices.items():
-        print(f"  {vehicle}: ${price:.2f}")
 
 
 def calculate_ticket_prices():
@@ -105,6 +102,10 @@ def calculate_ticket_prices():
     prices = {}
     for vehicle, (min_price, max_price) in TICKET_PRICES.items():
         prices[vehicle] = min_price + (max_price - min_price) * usage_ratio
+
+    for vehicle, (min_price, max_price) in TICKET_PRICES.items():
+        LIVE_PRICES[vehicle] = min_price + (max_price - min_price) * usage_ratio
+
     return prices
 
 
@@ -119,36 +120,25 @@ def decay_parking_lot():
     current_time = time.time()
     elapsed_time = current_time - last_decay_time
 
-    if elapsed_time >= 3:  # Decay every 3 seconds
-        sqm_to_free = int(elapsed_time // 3)
+    if elapsed_time >= 5:  # Decay every 5 seconds
+        sqm_to_free = int(elapsed_time // 5)
+        global CURRENT_SPACE
 
-        for _ in range(sqm_to_free):
-            # List of vehicle types that have at least one vehicle in the parking lot
-            available_vehicles = [vehicle for vehicle in parking_lot_state if parking_lot_state[vehicle] > 0]
-
-            if available_vehicles:
-                # Randomly choose a vehicle type
-                vehicle_to_free = random.choice(available_vehicles)
-
-                # Remove one of that vehicle type
-                parking_lot_state[vehicle_to_free] -= 1
-                print(f"Freed one {vehicle_to_free}.")
+        if (CURRENT_SPACE + sqm_to_free) <= PARKING_LOT_CAPACITY:
+            CURRENT_SPACE = CURRENT_SPACE + sqm_to_free
 
         # Update last decay time
         last_decay_time = current_time
 
-        # Calculate and print the remaining parking lot capacity
-        total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
-        remaining_capacity = PARKING_LOT_CAPACITY - total_occupied
         print(
-            f"Parking lot decay occurred. Remaining parking lot capacity: {remaining_capacity}/{PARKING_LOT_CAPACITY} square meters.")
+            f"Parking lot decay occurred. Remaining parking lot capacity: {CURRENT_SPACE}/{PARKING_LOT_CAPACITY} square meters.")
 
 
 def update_parking_lot(count):
     """
     Update the parking lot state with the counts from the current VR.
     """
-    global total_profit_last_30s, total_session_profit
+    global total_profit_last_30s, total_session_profit, CURRENT_SPACE
     prices = calculate_ticket_prices()
 
     print("Updated ticket prices:")
@@ -157,7 +147,7 @@ def update_parking_lot(count):
     print()
 
     # Update parking lot state and calculate total occupied space
-    total_occupied = 0
+    newVehicles = []
     for vehicle, cnt in count.items():
         if vehicle in parking_lot_state:
             parking_lot_state[vehicle] += cnt
@@ -168,12 +158,17 @@ def update_parking_lot(count):
                 total_profit_last_30s += profit
                 total_session_profit += profit  # Update the session's total profit
                 print(f"Found a {vehicle.upper()}. +{ticket_price:.2f} per ticket")
+                newVehicles.append((vehicle, ticket_price))
+                global latest_vehicle, latest_ticket_paid
+                latest_vehicle = vehicle
+                latest_ticket_paid = ticket_price
+                CURRENT_SPACE = CURRENT_SPACE - VEHICLE_SIZES[vehicle] * cnt
 
     # Calculate total occupied area
     total_occupied = sum(parking_lot_state[vehicle] * VEHICLE_SIZES[vehicle] for vehicle in parking_lot_state)
-    remaining_capacity = PARKING_LOT_CAPACITY - total_occupied
 
-    print(f"Remaining parking lot capacity: {remaining_capacity}/{PARKING_LOT_CAPACITY} square meters")
+    print(f"Remaining parking lot capacity: {CURRENT_SPACE}/{PARKING_LOT_CAPACITY} square meters")
+    return prices, total_occupied, newVehicles
 
 
 def counting(VR, line, cap, ini, double, model_mark, model_vehicle, saveVehicle):
@@ -273,14 +268,14 @@ def estimate_dynamic_daily_profit(total_profit_last_30s, vr_interval, video_fps)
     else:
         profit_per_space = total_session_profit / total_occupied
         daily_profit_estimate = total_session_profit + (
-                    profit_per_space * (PARKING_LOT_CAPACITY - total_occupied) * 1.25 * future_price_factor)
+                profit_per_space * (PARKING_LOT_CAPACITY - total_occupied) * 1.25 * future_price_factor)
 
     print(f"Profit per second of video: ${profit_per_second_video:.2f}")
     print(f"Estimated daily profit: ${daily_profit_estimate:.2f}")
     return daily_profit_estimate
 
 
-def main(video_path, line, sec, saveVR, saveVehicle):
+def main(video_path, line, sec, saveVR, saveVehicle, loop=False):
     ini = 0
     double = []
     VR = []
@@ -291,35 +286,55 @@ def main(video_path, line, sec, saveVR, saveVehicle):
     cap = cv2.VideoCapture(video_path)
     assert cap.isOpened(), 'Cannot open the video'
 
-    if saveVehicle and not os.path.exists('vehicle-crops/'):
-        os.makedirs('vehicle-crops/')
-    if saveVR and not os.path.exists('VR-images/'):
-        os.makedirs('VR-images/')
+    # Calculate delay based on video FPS
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_delay = 1 / fps  # Delay in seconds
 
     while True:
+        start_time = time.time()
+
+        if loop and ini >= cap.get(cv2.CAP_PROP_FRAME_COUNT):
+            ini = 0
+            double = []
+            VR = []
+            cap.release()  # Release and reinitialize to avoid corruption
+            cap = cv2.VideoCapture(video_path)
+            assert cap.isOpened(), "Cannot reopen the video file."
+
+        if CURRENT_SPACE <= 0:
+            print("Parking lot is full.")
+            break
+
         ret, frame = cap.read()
         if not ret:
-            break
+            if loop:
+                # Reset the video
+                print("End of video reached. Restarting...")
+                ini = 0
+                double = []
+                VR = []
+                cap.release()  # Release the current video capture
+                cap = cv2.VideoCapture(video_path)  # Reopen the video
+                assert cap.isOpened(), "Cannot reopen the video file."
+                cap.set(cv2.CAP_PROP_POS_FRAMES, ini)  # Reset to the start
+                continue
+            else:
+                # If looping is not enabled, break out of the loop
+                break
 
         VR.append(frame[line])
 
         if len(VR) == sec:
-            # print(f'VR image {ini // sec} created')
-
-            if saveVR:
-                name = f'VR-images/VR{ini // sec}.jpg'
-                print(f'Saving as {name}')
-                cv2.imwrite(name, np.array(VR))
-
             double, count = counting(np.array(VR), line, cap, ini, double, model_mark, model_vehicle, saveVehicle)
-            update_parking_lot(count)
+            toReturn = update_parking_lot(count)
             decay_parking_lot()  # Apply decay
-            prices = calculate_ticket_prices()
             estimate_dynamic_daily_profit(total_profit_last_30s, 90, cap.get(cv2.CAP_PROP_FPS))
 
             VR = []
             ini += sec
             cap.set(cv2.CAP_PROP_POS_FRAMES, ini)
+
+        time.sleep(frame_delay)  # Sleep for the remaining time
 
     cap.release()
     cv2.destroyAllWindows()
@@ -339,7 +354,12 @@ if __name__ == "__main__":
     parser.add_argument('--save-vehicle', type=bool, default=False, help='Enable saving vehicle images')
     args = parser.parse_args()
 
-    video_path = input('Enter the video path: ')
+    # video_path = input('Enter the video path: ')
+    video_path = "C:\\Users\\Laur\\Desktop\\Topici\\traffic.mp4"
+
+    starting_time = time.time()
 
     print('Counting vehicles in the video and updating parking lot state...\n')
-    main(video_path, args.line, args.interval, args.save_VR, args.save_vehicle)
+    main(video_path, args.line, args.interval, args.save_VR, args.save_vehicle, loop=True)
+
+    print(f"\nTotal execution time: {time.time() - starting_time:.2f} seconds")
